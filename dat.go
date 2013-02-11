@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-  "os"
+	"os"
 	"path"
 )
 
@@ -52,7 +52,7 @@ type Page struct {
 func loggerHandler(hf http.HandlerFunc) http.HandlerFunc {
 	// Wrap a logger func around a request handler
 	return func(w http.ResponseWriter, r *http.Request) {
-    referer := r.Referer()
+		referer := r.Referer()
 		logPattern := "%s - %s (%s)\n"
 		switch r.Method {
 		case GET:
@@ -69,6 +69,8 @@ func root(w http.ResponseWriter, r *http.Request) {
 	var err error
 	switch r.Method {
 	case GET:
+		// Load page content, which is the id="main"
+		// XXX: rewrite to slurp the links for the sidebar from the P_DIR folder
 		page := pageLoad(r.URL.Path[1:])
 		// Show template of index
 		err = render(w, ROOT_TMPLT, page)
@@ -112,7 +114,7 @@ func handleErr(w http.ResponseWriter, err error) {
 
 func main() {
 	// Initialize logger
-  log.SetOutput(os.Stderr)
+	log.SetOutput(os.Stderr)
 	// Handle request and wrap a logger around it
 	http.HandleFunc(ROOT, loggerHandler(root))
 
