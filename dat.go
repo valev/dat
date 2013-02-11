@@ -76,7 +76,7 @@ func root(w http.ResponseWriter, r *http.Request) {
 		err = render(w, ROOT_TMPLT, page)
 	case POST:
 		// Should not happen
-		_, err = fmt.Fprint(w, "What are you doing?!")
+		_, err = fmt.Fprint(w, "What are you doing?!\n")
 	}
 	if err != nil {
 		handleErr(w, err)
