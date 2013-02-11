@@ -8,9 +8,13 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sync"
 )
 
 const (
+	// Log pattern
+	LOG_P = "%s - %s\t\t(%s)\n"
+
 	// for reverse proxy redirects
 	APP  = "/dat"
 	ADDR = "localhost:8088"
@@ -40,6 +44,7 @@ const (
 )
 
 var (
+	readLock  sync.RWMutex
 	templates = template.Must(template.ParseFiles(path.Join(TMPLT_DIR, ROOT_TMPLT), path.Join(TMPLT_DIR, FOOTER_TMPLT)))
 )
 
@@ -53,12 +58,11 @@ func loggerHandler(hf http.HandlerFunc) http.HandlerFunc {
 	// Wrap a logger func around a request handler
 	return func(w http.ResponseWriter, r *http.Request) {
 		referer := r.Referer()
-		logPattern := "%s - %s (%s)\n"
 		switch r.Method {
 		case GET:
-			log.Printf(logPattern, GET, r.URL.Path, referer)
+			log.Printf(LOG_P, GET, r.URL.Path, referer)
 		case POST:
-			log.Printf(logPattern, POST, r.URL.Path, referer)
+			log.Printf(LOG_P, POST, r.URL.Path, referer)
 		}
 		hf(w, r)
 	}
@@ -86,6 +90,8 @@ func root(w http.ResponseWriter, r *http.Request) {
 }
 
 func pageLoad(page string) *Page {
+	readLock.RLock()
+	defer readLock.RUnlock()
 	// XXX: This function sucks. Rewrite it.
 	var b []byte
 	var err error
